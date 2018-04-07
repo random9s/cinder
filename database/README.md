@@ -1,8 +1,6 @@
 ### Database 
 A simple database wrapper
 
-### NOTE: This is currently useless.
-
 
 ### Basic Usage:
 ```go
@@ -41,4 +39,6 @@ func main() {
 }
 ```
 
-> To add a new database you'll need to satisfy both [config](https://github.com/random9s/fyu.se/blob/master/database/config/config.go) and [database](https://github.com/random9s/fyu.se/blob/master/database/database.go#L5-L11) interfaces. 
+> * To add a new database you'll need to satisfy both:
+    - [config](https://github.com/random9s/fyu.se/blob/master/database/config/config.go) 
+    - [database](https://github.com/random9s/fyu.se/blob/master/database/database.go#L5-L11) interfaces. 

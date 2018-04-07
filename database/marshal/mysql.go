@@ -21,22 +21,42 @@ func NewMySQL(db *sql.DB) *MySQL {
 
 //MarshalRow updates or deletes a row in a mysql database
 func (db *MySQL) MarshalRow(sql string, args ...interface{}) (interface{}, error) {
-	return db.Exec(sql, args...)
+	stmt, err := db.Prepare(sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return stmt.Exec(args...)
 }
 
 //MarshalRows updates or deletes many rows in a mysql database
 func (db *MySQL) MarshalRows(sql string, args ...interface{}) (interface{}, error) {
-	return db.Exec(sql, args...)
+	stmt, err := db.Prepare(sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return stmt.Exec(args...)
 }
 
 //MarshalField updates or deletes a rows field in a mysql database
 func (db *MySQL) MarshalField(sql string, args ...interface{}) (interface{}, error) {
-	return db.Exec(sql, args...)
+	stmt, err := db.Prepare(sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return stmt.Exec(args...)
 }
 
 //MarshalFields updates or deletes many fields in a mysql database
 func (db *MySQL) MarshalFields(sql string, args ...interface{}) (interface{}, error) {
-	return db.Exec(sql, args...)
+	stmt, err := db.Prepare(sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return stmt.Exec(args...)
 }
 
 //UnmarshalRow retrieves a row from a mysql database

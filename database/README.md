@@ -35,8 +35,8 @@ func main() {
     - Mysql
 
 * To add a new database you'll need to satisfy both:
-    - [config](https://github.com/random9s/fyu.se/blob/master/database/config/config.go) 
-    - [database](https://github.com/random9s/fyu.se/blob/master/database/database.go#L5-L11) interfaces. 
+    - [config](https://github.com/random9s/cinder/blob/master/database/config/config.go) 
+    - [database](https://github.com/random9s/cinder/blob/master/database/database.go#L5-L11) interfaces. 
 
 
 ### Using the Marshaler

@@ -17,23 +17,22 @@ const Key Resp = "wrappedResponse"
 
 //Response compressions
 const (
-	GZIP   = "gzip"
-	LZW    = "compress"
-	FLATE  = "deflate"
-	BROTLI = "br"
+	GZIP     = "gzip"
+	LZW      = "compress"
+	FLATE    = "deflate"
+	BROTLI   = "br"
+	IDENTITY = "identity"
 )
 
 type responseHandler struct {
 	contentEncoding string
-
-	getResp func(*http.Request) *Response
-	h       http.Handler
+	h               http.Handler
 }
 
 //Writer writes data to the responsewriter
-func Writer(contentEncoding string, getResp func(*http.Request) *Response) func(http.Handler) http.Handler {
+func Writer(contentEncoding string) func(http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
-		return &responseHandler{contentEncoding, getResp, h}
+		return &responseHandler{contentEncoding, h}
 	}
 }
 

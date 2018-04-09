@@ -14,7 +14,7 @@ func success() http.Handler {
         //Get responder from context
     	ctx := r.Context()
 	    v := ctx.Value(response.Key)
-	    resp, _ := v.(*response.RespWrapper)
+	    resp, _ := v.(*response.Response)
 
 	    //Write successful response
         var t = &struct{
@@ -32,7 +32,7 @@ func err() http.Handler{
         //Get responder from context
     	ctx := r.Context()
 	    v := ctx.Value(response.Key)
-	    resp, _ := v.(*response.RespWrapper)
+	    resp, _ := v.(*response.Response)
 
         var err = errors.New("bad stuff")
 	    resp.Error(err, http.StatusInternalServerError)

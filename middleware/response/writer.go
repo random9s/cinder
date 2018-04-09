@@ -39,7 +39,6 @@ func Writer(contentEncoding string) func(http.Handler) http.Handler {
 func (h *responseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resp := New(w)
 	resp.setEncoder(h.contentEncoding)
-
 	ctx := context.WithValue(r.Context(), Key, resp)
 	h.h.ServeHTTP(w, r.WithContext(ctx))
 }
@@ -65,6 +64,14 @@ func gzipcompress(r *Response) ([]byte, error) {
 	defer writer.Close()
 
 	_, err := writer.Write(r.Bytes())
+	if err != nil {
+		return nil, err
+	}
+
+	if err = writer.Flush(); err != nil {
+		return nil, err
+	}
+
 	return buff.Bytes(), err
 }
 
@@ -76,6 +83,10 @@ func lzwcompress(r *Response) ([]byte, error) {
 	defer writer.Close()
 
 	_, err := writer.Write(r.Bytes())
+	if err != nil {
+		return nil, err
+	}
+
 	return buff.Bytes(), err
 }
 
@@ -89,7 +100,14 @@ func deflate(r *Response) ([]byte, error) {
 	}
 	defer writer.Close()
 
-	_, err = writer.Write(r.Bytes())
+	if _, err = writer.Write(r.Bytes()); err != nil {
+		return nil, err
+	}
+
+	if err = writer.Flush(); err != nil {
+		return nil, err
+	}
+
 	return buff.Bytes(), err
 }
 

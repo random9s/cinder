@@ -6,8 +6,6 @@ import jwt "github.com/dgrijalva/jwt-go"
 type Token struct {
 	Access  string `json:"access"`
 	Refresh string `json:"refresh"`
-	Status  int    `json:"status"`
-	Err     string `json:"error"`
 
 	identifier string
 	subject    string

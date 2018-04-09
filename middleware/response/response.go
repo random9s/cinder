@@ -34,7 +34,6 @@ func New(w http.ResponseWriter) *Response {
 
 //WriteJSON returns a JSON Encoded server response
 func (r *Response) WriteJSON(v interface{}) error {
-	fmt.Println("check if written")
 	if !r.Written() {
 		r.Body = v
 		r.toJSON()

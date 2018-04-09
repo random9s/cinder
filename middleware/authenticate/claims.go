@@ -13,19 +13,19 @@ type CustomClaims struct {
 }
 
 //NewClaim returns new claims
-func NewClaim(exp int64, a *Authenticated) *CustomClaims {
+func NewClaim(t *Token) *CustomClaims {
 	var iat = time.Now().Unix()
-	var expTime = iat + exp
+	var expTime = iat + t.exp
 
 	return &CustomClaims{
 		jwt.StandardClaims{
 			NotBefore: iat,
 			IssuedAt:  iat,
 			ExpiresAt: expTime,
-			Id:        a.identifier,
-			Subject:   a.subject,
-			Issuer:    a.issuer,
-			Audience:  a.audience,
+			Id:        t.identifier,
+			Subject:   t.subject,
+			Issuer:    t.issuer,
+			Audience:  t.audience,
 		},
 	}
 }

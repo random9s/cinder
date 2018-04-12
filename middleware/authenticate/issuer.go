@@ -16,15 +16,13 @@ const Key Auth = "authenticate:user"
 //Issuer is responsible for issuing JWT after a user has been authenticated
 type Issuer struct {
 	Exp           int64
-	Hijacker      func(string, http.ResponseWriter, *http.Request) error
 	SigningMethod jwt.SigningMethod
 }
 
 //NewIssuer ...
-func NewIssuer(exp int64, hijacker func(string, http.ResponseWriter, *http.Request) error, signingMethod jwt.SigningMethod) *Issuer {
+func NewIssuer(exp int64, signingMethod jwt.SigningMethod) *Issuer {
 	return &Issuer{
 		Exp:           exp,
-		Hijacker:      hijacker,
 		SigningMethod: signingMethod,
 	}
 }

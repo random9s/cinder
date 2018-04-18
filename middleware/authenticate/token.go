@@ -1,6 +1,10 @@
 package authenticate
 
-import jwt "github.com/dgrijalva/jwt-go"
+import (
+	"errors"
+
+	jwt "github.com/dgrijalva/jwt-go"
+)
 
 //Token confirms if a user was authenticated
 type Token struct {
@@ -51,8 +55,26 @@ func (t *Token) Signer(signer []byte) {
 	t.signer = signer
 }
 
+//SignMethod sets the signing method
+func (t *Token) SignMethod(signingMethod jwt.SigningMethod) {
+	t.signMethod = signingMethod
+}
+
+//Expires sets the expire date
+func (t *Token) Expires(exp int64) {
+	t.exp = exp
+}
+
 //GenerateAccess returns access token
 func GenerateAccess(t *Token) error {
+	if t.signMethod == nil {
+		return errors.New("must set signing method")
+	}
+
+	if t.signer == nil {
+		return errors.New("must set signing key")
+	}
+
 	//Create JWT and send
 	var err error
 	t.Access, err = NewClaim(t).NewJWT(t.signMethod, t.signer)
@@ -61,6 +83,14 @@ func GenerateAccess(t *Token) error {
 
 //GenerateRefresh returns refresh token
 func GenerateRefresh(t *Token) error {
+	if t.signMethod == nil {
+		return errors.New("must set signing method")
+	}
+
+	if t.signer == nil {
+		return errors.New("must set signing key")
+	}
+
 	//Create JWT and send
 	var err error
 	t.Refresh, err = NewClaim(t).NewJWT(t.signMethod, t.signer)

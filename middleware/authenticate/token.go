@@ -23,9 +23,10 @@ type Token struct {
 }
 
 //NewToken ...
-func NewToken(exp int64, method jwt.SigningMethod) *Token {
+func NewToken(exp int64, method jwt.SigningMethod, signer []byte) *Token {
 	return &Token{
 		exp:        exp,
+		signer:     signer,
 		signMethod: method,
 	}
 }

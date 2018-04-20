@@ -3,70 +3,75 @@ package response
 import (
 	"bytes"
 	"encoding/json"
+	"encoding/xml"
 	"errors"
-	"fmt"
 	"net/http"
 )
 
 //Response ...
 type Response struct {
-	Body        interface{}
-	ContentType string
-	Status      int
-
 	encoder func(*Response) ([]byte, error)
 	body    *bytes.Buffer
 
-	w       http.ResponseWriter
-	written bool
+	header http.Header
+	status int
 }
 
 //New wraps responsewriter
-func New(w http.ResponseWriter) *Response {
+func New() *Response {
 	return &Response{
-		Body:    nil,
-		body:    &bytes.Buffer{},
-		w:       w,
-		written: false,
+		body:   &bytes.Buffer{},
+		header: make(http.Header),
 	}
+}
+
+//Header returns http headers
+func (r *Response) Header() http.Header {
+	return r.header
+}
+
+//WriteHeader ...
+func (r *Response) WriteHeader(statusCode int) {
+	r.status = statusCode
 }
 
 //WriteJSON returns a JSON Encoded server response
-func (r *Response) WriteJSON(v interface{}) error {
+func (r *Response) WriteJSON(v interface{}) (int, error) {
 	if !r.Written() {
-		r.Body = v
-		r.toJSON()
-		r.ContentType = "application/json; charset=UTF-8"
-		return r.write()
+		b, err := json.Marshal(v)
+		if err != nil {
+			return 0, err
+		}
+
+		if r.header.Get("Content-Type") == "" {
+			r.header.Add("Content-Type", "application/json; charset=UTF-8")
+		}
+		return r.Write(b)
 	}
 
-	return errors.New("response has already been written")
+	return 0, errors.New("response has already been written")
 }
 
 //WriteXML returns an XML Encdoded server response
-func (r *Response) WriteXML(v interface{}) error {
-	//TODO
-	return errors.New("xml is not yet supported")
-}
+func (r *Response) WriteXML(v interface{}) (int, error) {
+	if !r.Written() {
+		b, err := xml.Marshal(v)
+		if err != nil {
+			return 0, err
+		}
 
-func (r *Response) write() error {
-	r.w.Header().Add("Accept-Charset", "utf-8")
-	r.w.Header().Add("Content-Type", fmt.Sprintf("%s", r.ContentType))
+		if r.header.Get("Content-Type") == "" {
+			r.header.Add("Content-Type", "application/xml; charset=UTF-8")
+		}
 
-	b, err := r.encoder(r)
-	if err != nil {
-		return err
+		return r.Write(b)
 	}
 
-	r.w.Header().Add("Content-Length", fmt.Sprintf("%s", len(b)))
-	r.w.WriteHeader(r.Status)
-	r.w.Write(b)
-	r.written = true
-	return nil
+	return 0, errors.New("response has already been written")
 }
 
 //Error ...
-func (r *Response) Error(err error, status int) error {
+func (r *Response) Error(err error, status int) (int, error) {
 	if !r.Written() {
 		var e = &struct {
 			Error string `json:"error"`
@@ -74,32 +79,21 @@ func (r *Response) Error(err error, status int) error {
 			Error: err.Error(),
 		}
 
-		r.Body = e
-		r.Status = status
-		r.toJSON()
-		r.ContentType = "application/json; charset=UTF-8"
+		r.status = status
+		b, err := json.Marshal(e)
+		if err != nil {
+			return 0, err
+		}
 
-		return r.write()
+		return r.Write(b)
 	}
 
-	return errors.New("response has already been written")
+	return 0, errors.New("response has already been written")
 }
 
-func (r *Response) toJSON() {
-	var buff = &bytes.Buffer{}
-
-	err := json.NewEncoder(buff).Encode(r.Body)
-	if err != nil {
-		r.Status = http.StatusInternalServerError
-		r.body = bytes.NewBuffer([]byte(err.Error()))
-		return
-	}
-
-	r.body = buff
-}
-
-func (r *Response) toXML() {
-	//TODO
+//Write ...
+func (r *Response) Write(b []byte) (int, error) {
+	return r.body.Write(b)
 }
 
 //Len of the response body
@@ -114,5 +108,5 @@ func (r *Response) Bytes() []byte {
 
 //Written checks if response has been written
 func (r *Response) Written() bool {
-	return r.written
+	return r.Len() > 0
 }

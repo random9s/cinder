@@ -5,13 +5,11 @@ Reduce redundancy in future Web API projects.
 ```go
     import (
         "github.com/gorilla/mux"
-        "fyu.se/server"
+        "github.com/random9s/cinder/server"
     )
 
     func main() {
-        //I generally use a gorilla mux router, but it's not required
         router := mux.NewRouter()
-
         srv := server.New(router)
         srv.Run()    
     }

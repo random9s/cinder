@@ -79,8 +79,3 @@ func (m *Mysql) FormatDSN() string {
 	}
 	return conf.FormatDSN()
 }
-
-//Close closes the underlying database connection
-func (m *Mysql) Close() error {
-	return m.Close()
-}

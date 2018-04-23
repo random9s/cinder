@@ -35,6 +35,11 @@ func (r *Response) WriteHeader(statusCode int) {
 	r.status = statusCode
 }
 
+//Status ...
+func (r *Response) Status() int {
+	return r.status
+}
+
 //WriteJSON returns a JSON Encoded server response
 func (r *Response) WriteJSON(v interface{}) (int, error) {
 	if !r.Written() {

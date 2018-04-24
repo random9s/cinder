@@ -21,7 +21,7 @@ func New() *Response {
 	return &Response{
 		&bytes.Buffer{},
 		make(http.Header),
-		0,
+		200,
 	}
 }
 

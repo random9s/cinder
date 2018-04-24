@@ -34,6 +34,7 @@ func (h *responseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Length", strconv.FormatInt(int64(len(b)), 10))
+	w.Header().Set("X-Server-Status", strconv.FormatInt(int64(resp.status), 10))
 	w.WriteHeader(resp.status)
 	w.Write(b)
 }

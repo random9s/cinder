@@ -40,9 +40,9 @@ func gzipcompress(r *Response) ([]byte, error) {
 
 	var buff bytes.Buffer
 	writer := gzip.NewWriter(&buff)
-	defer writer.Close()
-
 	_, err := writer.Write(r.Bytes())
+	writer.Close()
+
 	return buff.Bytes(), err
 }
 
@@ -51,9 +51,9 @@ func lzwcompress(r *Response) ([]byte, error) {
 
 	var buff bytes.Buffer
 	writer := lzw.NewWriter(&buff, lzw.MSB, 8)
-	defer writer.Close()
-
 	_, err := writer.Write(r.Bytes())
+	writer.Close()
+
 	return buff.Bytes(), err
 }
 
@@ -65,9 +65,10 @@ func deflate(r *Response) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer writer.Close()
 
 	_, err = writer.Write(r.Bytes())
+	writer.Close()
+
 	return buff.Bytes(), err
 }
 

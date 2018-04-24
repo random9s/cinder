@@ -10,8 +10,7 @@ import (
 
 //Response ...
 type Response struct {
-	encoder func(*Response) ([]byte, error)
-	body    *bytes.Buffer
+	*bytes.Buffer
 
 	header http.Header
 	status int
@@ -20,8 +19,9 @@ type Response struct {
 //New wraps responsewriter
 func New() *Response {
 	return &Response{
-		body:   &bytes.Buffer{},
-		header: make(http.Header),
+		&bytes.Buffer{},
+		make(http.Header),
+		0,
 	}
 }
 
@@ -94,21 +94,6 @@ func (r *Response) Error(err error, status int) (int, error) {
 	}
 
 	return 0, errors.New("response has already been written")
-}
-
-//Write ...
-func (r *Response) Write(b []byte) (int, error) {
-	return r.body.Write(b)
-}
-
-//Len of the response body
-func (r *Response) Len() int {
-	return r.body.Len()
-}
-
-//Bytes returns body to write
-func (r *Response) Bytes() []byte {
-	return r.body.Bytes()
 }
 
 //Written checks if response has been written

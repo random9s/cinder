@@ -46,14 +46,13 @@ func (s *Server) RunTLS() error {
 		return fmt.Errorf("tls cert pair not found")
 	}
 
-	go s.runSandbox("80")
-	return s.runProduction("443")
+	return s.runProduction()
 }
 
-func (s *Server) runSandbox(port ...string) error {
+func (s *Server) runSandbox() error {
 	var p = s.Config.Port()
-	if len(port) != 0 {
-		p = port[0]
+	if len(p) == 0 {
+		p = "8080"
 	}
 
 	printDebugStart(p)
@@ -63,10 +62,10 @@ func (s *Server) runSandbox(port ...string) error {
 	)
 }
 
-func (s *Server) runProduction(port ...string) error {
+func (s *Server) runProduction() error {
 	var p = s.Config.Port()
-	if len(port) != 0 {
-		p = port[0]
+	if len(p) == 0 {
+		p = "80"
 	}
 
 	printDebugStart(p)

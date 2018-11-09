@@ -3,6 +3,7 @@ package pipeline
 import (
 	"errors"
 	"fmt"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -120,6 +121,7 @@ func (p *Pipeline) watchForErrors() {
 	p.abortedWith <- <-p.abort
 	close(p.globalAlert)
 	p.shutdown()
+	runtime.Goexit()
 }
 
 //shutdown closes all running processes in the pipeline
@@ -231,11 +233,14 @@ func (p *Pipeline) FanIn(n int, fn ContextFn) error {
 						return
 					}
 				}
+
+				runtime.Goexit()
 			}(sendCh, &wg)
 		}
 
 		wg.Wait()
 		close(midCh)
+		runtime.Goexit()
 	}()
 
 	p.tail = []Processor{proc}
@@ -296,11 +301,13 @@ func (p *Pipeline) ConnectNtoM(n, m int, fn ContextFn) error {
 						return
 					}
 				}
+				runtime.Goexit()
 			}(sendCh, &wg)
 		}
 
 		wg.Wait()
 		close(midCh)
+		runtime.Goexit()
 	}()
 
 	p.tail = procs

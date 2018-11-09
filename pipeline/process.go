@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"errors"
+	"runtime"
 	"sync"
 )
 
@@ -50,6 +51,7 @@ func (p *Process) Receive() {
 	}
 
 	p.Close()
+	runtime.Goexit()
 }
 
 //Abort calls the parent abort func

@@ -3,7 +3,6 @@ package pipeline
 import (
 	"errors"
 	"fmt"
-	"runtime"
 	"sync"
 	"time"
 )
@@ -121,7 +120,6 @@ func (p *Pipeline) Abort(err error) {
 	}()
 
 	if p.abort != nil {
-		fmt.Printf("ABORTED WITH: %s", err)
 		p.abort <- err
 	}
 }
@@ -132,7 +130,6 @@ func (p *Pipeline) watchForErrors() {
 	//This will block until an error occurs
 	p.abortedWith <- <-p.abort
 	close(p.globalAlert)
-	fmt.Println("SHUTDOWN")
 	p.shutdown()
 }
 
@@ -245,7 +242,6 @@ func (p *Pipeline) FanIn(n int, fn ContextFn) error {
 						return
 					}
 
-					runtime.Gosched()
 				}
 			}(sendCh, &wg)
 		}
@@ -312,7 +308,6 @@ func (p *Pipeline) ConnectNtoM(n, m int, fn ContextFn) error {
 						return
 					}
 
-					runtime.Gosched()
 				}
 			}(sendCh, &wg)
 		}

@@ -2,13 +2,14 @@ package pipeline
 
 import (
 	"errors"
+	"runtime"
 	"sync"
 )
 
 //ContextFn wraps the users function and provides the necessary controls to alert the pipeline of completion and errors
 type ContextFn func(interface{}, func(interface{}) bool, func(error))
 
-//Process listens for work, processes the work via the ContextFn and finally sends the work to a subsequent process
+//Process waits for work, processes the work via the ContextFn and finally sends the work to a subsequent process
 type Process struct {
 	Run ContextFn
 
@@ -30,15 +31,15 @@ func newProcess(p *Pipeline, fn ContextFn) *Process {
 }
 
 //Send moves data to the next process in the pipeline
-func (p *Process) Send(v interface{}) (closed bool) {
+func (p *Process) Send(v interface{}) (open bool) {
 	defer func() {
 		if r := recover(); r != nil {
-			closed = true
+			open = false
 		}
 	}()
 
 	p.send <- v
-	return false
+	return true
 }
 
 //Receive accepts data and processes it
@@ -46,6 +47,7 @@ func (p *Process) Receive() {
 	for v := range p.receive {
 		if v != nil {
 			p.Run(v, p.Send, p.Abort)
+			runtime.Gosched()
 		}
 	}
 

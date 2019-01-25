@@ -3,6 +3,7 @@ package pipeline
 import (
 	"errors"
 	"fmt"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -32,6 +33,7 @@ type Pipeline struct {
 	abort       chan error
 	abortedWith chan error
 	globalAlert chan int
+	started     bool
 }
 
 //New returns a newly initialized pipeline
@@ -43,6 +45,7 @@ func New() *Pipeline {
 		abort:       make(chan error, 1),
 		abortedWith: make(chan error, 1),
 		globalAlert: make(chan int),
+		started:     false,
 	}
 	pipe.Procs = append(pipe.Procs, newProcess(pipe, nil))
 
@@ -58,6 +61,7 @@ func (p *Pipeline) Start(v interface{}) {
 
 	//Before the first send, attach the closer channel to all final processes
 	p.once.Do(func() {
+		p.started = true
 		//upgrade the buffer size, if needed
 		p.closer = make(chan bool, len(p.tail))
 		for _, tail := range p.tail {
@@ -76,6 +80,10 @@ func (p *Pipeline) Wait() error {
 
 	//wait for all procs in tail to close
 	p.Procs[0].Close()
+	if !p.started {
+		return nil
+	}
+
 	for i := 0; i < len(p.tail); i++ {
 		<-p.closer
 	}
@@ -88,7 +96,11 @@ func (p *Pipeline) WaitWithTimeout(dur time.Duration) error {
 	if p.closer == nil {
 		panic(errors.New("cannot receive from nil channel"))
 	}
+
 	p.Procs[0].Close()
+	if !p.started {
+		return nil
+	}
 
 	//wait for all procs in tail to close or timeout to occur
 	for i := 0; i < len(p.tail); i++ {
@@ -109,6 +121,7 @@ func (p *Pipeline) Abort(err error) {
 	}()
 
 	if p.abort != nil {
+		fmt.Printf("ABORTED WITH: %s", err)
 		p.abort <- err
 	}
 }
@@ -119,6 +132,7 @@ func (p *Pipeline) watchForErrors() {
 	//This will block until an error occurs
 	p.abortedWith <- <-p.abort
 	close(p.globalAlert)
+	fmt.Println("SHUTDOWN")
 	p.shutdown()
 }
 
@@ -230,6 +244,8 @@ func (p *Pipeline) FanIn(n int, fn ContextFn) error {
 						wg.Done()
 						return
 					}
+
+					runtime.Gosched()
 				}
 			}(sendCh, &wg)
 		}
@@ -295,6 +311,8 @@ func (p *Pipeline) ConnectNtoM(n, m int, fn ContextFn) error {
 						wg.Done()
 						return
 					}
+
+					runtime.Gosched()
 				}
 			}(sendCh, &wg)
 		}

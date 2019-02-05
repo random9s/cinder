@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/random9s/cinder/database/config"
-	"github.com/random9s/cinder/database/marshal"
+	db "github.com/random9s/cinder/database/marshal"
 )
 
 //Mysql ...

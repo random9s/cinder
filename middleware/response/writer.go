@@ -1,8 +1,10 @@
 package response
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type responseHandler struct {
@@ -22,19 +24,31 @@ func (h *responseHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	h.h.ServeHTTP(resp, r)
 
-	enc := encoder(h.ContentEncoding)
-	b, err := enc(resp)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	var ae = r.Header.Get("Accept-Encoding")
+	var b = resp.Bytes()
+	var err error
+
+	w.Header().Set("Content-Type", http.DetectContentType(b))
+	if strings.Contains(ae, h.ContentEncoding) {
+		enc := encoder(h.ContentEncoding)
+		b, err = enc(resp)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		w.Header().Set("Content-Encoding", "identity")
 	}
 
 	for key, val := range resp.header {
 		w.Header()[key] = val
 	}
 
+	w.Header().Add("Vary", "Accept-Encoding")
 	w.Header().Set("Content-Length", strconv.FormatInt(int64(len(b)), 10))
 	w.Header().Set("X-Server-Status", strconv.FormatInt(int64(resp.status), 10))
+
+	fmt.Printf("HEADERS: %#v\n", w.Header())
 	w.WriteHeader(resp.status)
 	w.Write(b)
 }

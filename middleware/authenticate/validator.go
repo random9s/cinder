@@ -43,6 +43,13 @@ func (v *Validator) ValidateToken(r *http.Request) error {
 		return errors.New("empty authorization header")
 	}
 
+	if strings.Contains(bearer, "Basic") {
+		bearer = r.Header.Get("x-saf-auth")
+		if bearer == "" {
+			return errors.New("empty authorization header")
+		}
+	}
+
 	//Remove Bearer from token
 	token := strings.TrimPrefix(bearer, "Bearer ")
 

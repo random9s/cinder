@@ -48,9 +48,6 @@ func (r *Response) WriteJSON(v interface{}) (int, error) {
 			return 0, err
 		}
 
-		if r.header.Get("Content-Type") == "" {
-			r.header.Add("Content-Type", "application/json; charset=UTF-8")
-		}
 		return r.Write(b)
 	}
 
@@ -63,10 +60,6 @@ func (r *Response) WriteXML(v interface{}) (int, error) {
 		b, err := xml.Marshal(v)
 		if err != nil {
 			return 0, err
-		}
-
-		if r.header.Get("Content-Type") == "" {
-			r.header.Add("Content-Type", "application/xml; charset=UTF-8")
 		}
 
 		return r.Write(b)
